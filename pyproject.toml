@@ -1,0 +1,14 @@
+[project]
+name = "tldpy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "django-environ>=0.13.0",
+    "django-pg8000>=0.0.5",
+    "django-storages[s3]>=1.14.6",
+    "loguru>=0.7.3",
+    "pg8000>=1.31.5",
+    "wagtail>=7.3.1",
+]
