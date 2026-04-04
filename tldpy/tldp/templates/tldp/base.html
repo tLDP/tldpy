@@ -1,0 +1,69 @@
+{% load django_bootstrap5 %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ lang|default:'en' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title|default:key }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 70px; }
+        .content-body { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/{{ lang|default:'en' }}/">LDP</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/{{ lang|default:'en' }}/">Home</a>
+                    </li>
+                    {% if ldplist %}
+                    {% for category, items in ldplist.items %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="{{ category }}Dropdown" role="button" data-bs-toggle="dropdown">
+                            {{ category }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="{{ category }}Dropdown">
+                            {% for item in items %}
+                            <li><a class="dropdown-item" href="/{{ lang|default:'en' }}/{{ item }}/">{{ item }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if breadcrumbs %}
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/{{ lang|default:'en' }}/">Home</a></li>
+                {% for crumb in breadcrumbs %}
+                {% if forloop.last %}
+                <li class="breadcrumb-item active" aria-current="page">{{ crumb.name }}</li>
+                {% else %}
+                <li class="breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.name }}</a></li>
+                {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+        {% endif %}
+
+        <div class="content-body">
+            {{ content|safe }}
+        </div>
+    </div>
+
+    {% bootstrap_javascript %}
+</body>
+</html>
