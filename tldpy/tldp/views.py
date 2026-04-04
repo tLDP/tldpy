@@ -54,6 +54,26 @@ def get_category_for_key(lang, key):
     return None
 
 
+_build_date = None
+
+
+def get_build_date():
+    global _build_date
+    if _build_date is None:
+        try:
+            file = default_storage.open("build-date.txt", "r")
+            content = file.read()
+            _build_date = (
+                content.decode().strip()
+                if isinstance(content, bytes)
+                else content.strip()
+            )
+            file.close()
+        except Exception:
+            _build_date = None
+    return _build_date
+
+
 def render_document(request, lang, key, html, title, breadcrumbs=None):
     ldplist = get_ldplist(lang)
     category = get_category_for_key(lang, key)
@@ -69,6 +89,7 @@ def render_document(request, lang, key, html, title, breadcrumbs=None):
             "content": html,
             "breadcrumbs": breadcrumbs or [],
             "ldplist": ldplist,
+            "build_date": get_build_date(),
         },
     )
 
@@ -112,7 +133,7 @@ class LDPIndexView(View):
             content += "</div>"
             return render_document(request, lang, None, content, f"{filter_cat} - TLDP")
 
-        content = ''
+        content = ""
         for category, items in ldplist.items():
             content += f'<div class="row mt-4"><div class="col-12"><h4>{category}</h4><div class="row">'
             for item in items[:12]:

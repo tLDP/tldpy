@@ -64,6 +64,14 @@
         </div>
     </div>
 
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            {% if build_date %}
+            <span class="text-muted">Last build: {{ build_date }}</span>
+            {% endif %}
+        </div>
+    </footer>
+
     {% bootstrap_javascript %}
 </body>
 </html>
