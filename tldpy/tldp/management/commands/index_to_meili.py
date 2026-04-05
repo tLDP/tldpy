@@ -112,7 +112,10 @@ def fetch_index_content(key):
         file = default_storage.open(path, "rb")
         content = file.read()
         file.close()
-        return content.decode("utf-8", errors="replace")
+        try:
+            return content.decode("utf-8")
+        except UnicodeDecodeError:
+            return content.decode("latin-1")
     except Exception:
         return None
 

@@ -8,6 +8,15 @@ import mimetypes
 import re
 
 
+def decode_content(content):
+    if isinstance(content, bytes):
+        try:
+            return content.decode("utf-8")
+        except UnicodeDecodeError:
+            return content.decode("latin-1")
+    return content
+
+
 def get_ldplist(lang="en"):
     try:
         file = default_storage.open(f"{lang}/ldplist.json", "r")
@@ -64,11 +73,12 @@ def get_build_date():
         try:
             file = default_storage.open("build-date.txt", "r")
             content = file.read()
-            _build_date = (
-                content.decode().strip()
-                if isinstance(content, bytes)
-                else content.strip()
-            )
+            if isinstance(content, bytes):
+                try:
+                    content = content.decode("utf-8")
+                except UnicodeDecodeError:
+                    content = content.decode("latin-1")
+            _build_date = content.strip()
             file.close()
         except Exception:
             _build_date = None
@@ -113,7 +123,7 @@ class LDPIndexView(View):
         content_type, _ = mimetypes.guess_type(path)
 
         if content_type and content_type.startswith("text/html"):
-            html = content.decode("utf-8", errors="replace")
+            html = decode_content(content)
             title = extract_title(html) or doc_title
             breadcrumbs = extract_breadcrumbs(html)
             return render_document(request, lang, key, html, title, breadcrumbs)
@@ -165,7 +175,7 @@ def serve_file(request, lang, key, path):
         raise Http404(f"File not found: {full_path}")
 
     if content_type and content_type.startswith("text/html"):
-        html = content.decode("utf-8", errors="replace")
+        html = decode_content(content)
         title = extract_title(html) or key
         page_name = path.replace("index.html", key).replace(".html", "")
         breadcrumbs = [
