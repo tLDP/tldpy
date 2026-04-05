@@ -131,7 +131,7 @@ class LDPIndexView(View):
             for item in items:
                 content += f'<div class="col-md-3 mb-3"><a href="/{lang}/{item}/" class="text-decoration-none"><div class="card h-100"><div class="card-body"><h6 class="card-title">{item}</h6></div></div></a></div>'
             content += "</div>"
-            return render_document(request, lang, None, content, f"{filter_cat} - TLDP")
+            return render_document(request, lang, None, content, f"{filter_cat} - LDP")
 
         content = ""
         for category, items in ldplist.items():
@@ -142,7 +142,7 @@ class LDPIndexView(View):
                 content += f'<div class="col-md-3 mb-3"><a href="/{lang}/?cat={category}" class="btn btn-outline-primary">View all {len(items)} {category}...</a></div>'
             content += "</div></div></div>"
 
-        return render_document(request, lang, None, content, "TLDP Documents")
+        return render_document(request, lang, None, content, "LDP Documents")
 
 
 class LDPListView(View):
