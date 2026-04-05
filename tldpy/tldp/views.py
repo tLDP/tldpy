@@ -10,10 +10,7 @@ import re
 
 def decode_content(content):
     if isinstance(content, bytes):
-        try:
-            return content.decode("utf-8")
-        except UnicodeDecodeError:
-            return content.decode("latin-1")
+        return content.decode("latin-1")
     return content
 
 
