@@ -84,6 +84,8 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+ROOT_URLCONF = "tldp.urls"
+
 # MeiliSearch
 MEILISEARCH = {
     "HOST": env("MEILI_URL", default="localhost"),
