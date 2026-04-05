@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_bootstrap5",
+    "tldp",
 ]
 
 MIDDLEWARE = [
@@ -150,3 +151,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+# MeiliSearch
+MEILISEARCH = {
+    "HOST": env("MEILI_URL", default="localhost"),
+    "MASTER_KEY": env("MEILI_PASS", default=""),
+    "HTTPS": False,
+    "PORT": env.int("MEILI_PORT", default=7700),
+}
