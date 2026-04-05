@@ -1,3 +1,4 @@
+import boto3
 import json
 from django.http import (
     FileResponse,
@@ -12,6 +13,20 @@ from django.core.files.storage import default_storage
 from django.conf import settings
 import mimetypes
 import re
+
+
+def get_presigned_url(path, expiration=3600):
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id=settings.AWS_S3_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_S3_SECRET_ACCESS_KEY,
+        endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+    )
+    return s3.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": settings.AWS_S3_BUCKET_NAME, "Key": path},
+        ExpiresIn=expiration,
+    )
 
 
 def decode_content(content):
@@ -142,7 +157,7 @@ class LDPIndexView(View):
             items = ldplist[filter_cat]
             content = f'<div class="row"><div class="col-12"><h3>{filter_cat} ({len(items)} documents)</h3><a href="/{lang}/" class="btn btn-secondary btn-sm mb-3">← All Categories</a></div></div><div class="row">'
             for item in items:
-                pdf_url = default_storage.url(f"{lang}/{item}/{item}.pdf")
+                pdf_url = get_presigned_url(f"{lang}/{item}/{item}.pdf")
                 content += f'''<div class="col-md-3 mb-3">
                     <div class="card h-100">
                         <div class="card-body">
@@ -159,7 +174,7 @@ class LDPIndexView(View):
         for category, items in ldplist.items():
             content += f'<div class="row mt-4"><div class="col-12"><h4>{category}</h4><div class="row">'
             for item in items[:12]:
-                pdf_url = default_storage.url(f"{lang}/{item}/{item}.pdf")
+                pdf_url = get_presigned_url(f"{lang}/{item}/{item}.pdf")
                 content += f'''<div class="col-md-3 mb-3">
                     <div class="card h-100">
                         <div class="card-body">
