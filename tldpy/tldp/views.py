@@ -142,7 +142,16 @@ class LDPIndexView(View):
             items = ldplist[filter_cat]
             content = f'<div class="row"><div class="col-12"><h3>{filter_cat} ({len(items)} documents)</h3><a href="/{lang}/" class="btn btn-secondary btn-sm mb-3">← All Categories</a></div></div><div class="row">'
             for item in items:
-                content += f'<div class="col-md-3 mb-3"><a href="/{lang}/{item}/" class="text-decoration-none"><div class="card h-100"><div class="card-body"><h6 class="card-title">{item}</h6></div></div></a></div>'
+                pdf_url = default_storage.url(f"{lang}/{item}/{item}.pdf")
+                content += f'''<div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">{item}</h6>
+                            <a href="/{lang}/{item}/" class="btn btn-primary btn-sm me-1">HTML</a>
+                            <a href="{pdf_url}" class="btn btn-secondary btn-sm" download><i class="bi bi-file-pdf"></i> PDF</a>
+                        </div>
+                    </div>
+                </div>'''
             content += "</div>"
             return render_document(request, lang, None, content, f"{filter_cat} - LDP")
 
@@ -150,7 +159,16 @@ class LDPIndexView(View):
         for category, items in ldplist.items():
             content += f'<div class="row mt-4"><div class="col-12"><h4>{category}</h4><div class="row">'
             for item in items[:12]:
-                content += f'<div class="col-md-3 mb-3"><a href="/{lang}/{item}/" class="text-decoration-none"><div class="card h-100"><div class="card-body"><h6 class="card-title">{item}</h6></div></div></a></div>'
+                pdf_url = default_storage.url(f"{lang}/{item}/{item}.pdf")
+                content += f'''<div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">{item}</h6>
+                            <a href="/{lang}/{item}/" class="btn btn-primary btn-sm me-1">HTML</a>
+                            <a href="{pdf_url}" class="btn btn-secondary btn-sm" download><i class="bi bi-file-pdf"></i> PDF</a>
+                        </div>
+                    </div>
+                </div>'''
             if len(items) > 12:
                 content += f'<div class="col-md-3 mb-3"><a href="/{lang}/?cat={category}" class="btn btn-outline-primary">View all {len(items)} {category}...</a></div>'
             content += "</div></div></div>"
