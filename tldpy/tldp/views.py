@@ -1,8 +1,9 @@
 import json
-from django.http import FileResponse, Http404, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views import View
 from django.core.files.storage import default_storage
+from django.conf import settings
 import mimetypes
 import re
 
@@ -174,3 +175,91 @@ def serve_file(request, lang, key, path):
         return render_document(request, lang, key, html, title, breadcrumbs)
 
     return FileResponse(content, content_type=content_type)
+
+
+def search_api(request, lang="en"):
+    query = request.GET.get("q", "")
+    limit = int(request.GET.get("limit", 10))
+
+    if len(query) < 2:
+        return JsonResponse({"results": []})
+
+    try:
+        import meilisearch
+
+        host = settings.MEILISEARCH["HOST"].split(":")[0]
+        port = settings.MEILISEARCH["PORT"]
+        client = meilisearch.Client(
+            f"http://{host}:{port}",
+            settings.MEILISEARCH.get("MASTER_KEY"),
+        )
+        index = client.index("documents")
+        results = index.search(
+            query,
+            {
+                "limit": limit,
+                "attributesToRetrieve": ["key", "title", "url", "category", "content"],
+                "attributesToHighlight": ["title", "content"],
+                "highlightPreTag": "<mark>",
+                "highlightPostTag": "</mark>",
+            },
+        )
+
+        return HttpResponse(
+            json.dumps({"results": results.get("hits", [])}).encode("utf-8"),
+            content_type="application/json",
+        )
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+def search_page(request, lang="en"):
+    query = request.GET.get("q", "")
+    results = []
+
+    if query:
+        try:
+            import meilisearch
+
+            host = settings.MEILISEARCH["HOST"].split(":")[0]
+            port = settings.MEILISEARCH["PORT"]
+            client = meilisearch.Client(
+                f"http://{host}:{port}",
+                settings.MEILISEARCH.get("MASTER_KEY"),
+            )
+            index = client.index("documents")
+            search_results = index.search(query, {"limit": 50})
+            results = search_results.get("hits", [])
+        except Exception:
+            results = []
+
+    html = render_search_results(query, results)
+    return render(
+        request,
+        "tldp/base.html",
+        {
+            "lang": lang,
+            "title": f"Search: {query}" if query else "Search",
+            "content": html,
+            "breadcrumbs": [{"name": "Search", "url": ""}],
+            "ldplist": get_ldplist(lang),
+            "build_date": get_build_date(),
+        },
+    )
+
+
+def render_search_results(query, results):
+    if not results:
+        return f'<div class="alert alert-warning">No results found for "{query}".</div>'
+
+    html = (
+        f'<div class="alert alert-info mb-3">{len(results)} results for "{query}"</div>'
+    )
+    html += '<div class="list-group">'
+    for r in results:
+        html += f'<a href="{r.get("url", "#")}" class="list-group-item list-group-item-action"><strong>{r.get("title", r.get("key", ""))}</strong>'
+        if r.get("category"):
+            html += f'<span class="badge bg-secondary ms-2">{r.get("category")}</span>'
+        html += "</a>"
+    html += "</div>"
+    return html
