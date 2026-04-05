@@ -1,5 +1,11 @@
 import json
-from django.http import FileResponse, Http404, HttpResponse, JsonResponse
+from django.http import (
+    FileResponse,
+    Http404,
+    HttpResponse,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import render
 from django.views import View
 from django.core.files.storage import default_storage
@@ -125,9 +131,8 @@ class LDPIndexView(View):
             breadcrumbs = extract_breadcrumbs(html)
             return render_document(request, lang, key, html, title, breadcrumbs)
 
-        return FileResponse(
-            content, content_type=content_type or "application/octet-stream"
-        )
+        presigned_url = default_storage.url(path)
+        return HttpResponseRedirect(presigned_url)
 
     def list_keys(self, request, lang):
         ldplist = get_ldplist(lang)
@@ -181,7 +186,8 @@ def serve_file(request, lang, key, path):
         ]
         return render_document(request, lang, key, html, title, breadcrumbs)
 
-    return FileResponse(content, content_type=content_type)
+    presigned_url = default_storage.url(full_path)
+    return HttpResponseRedirect(presigned_url)
 
 
 def search_api(request, lang="en"):
