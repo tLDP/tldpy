@@ -12,3 +12,8 @@ dependencies = [
     "loguru>=0.7.3",
     "pg8000>=1.31.5",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest-codspeed>=4.4.0",
+]
